@@ -1,0 +1,272 @@
+<html>
+    <head>
+        <title>Windspeed</title>
+        <style type="text/css">
+            svg { height: 100px; width: 100px; border: 1px solid #ccc; }
+        </style>
+    </head>
+    <body>
+        <svg id="windspeed"></svg>
+        <svg id="thermometer"></svg>
+        <svg id="windmeter"></svg>
+        <svg id="humidity"></svg>
+        
+        <br /><button onclick="windspeed.changeSpeed()">Change speed</button>
+        <br /><button onclick="thermometer.changeTemperature()">Change temperature</button>
+        <br /><button onclick="windmeter.changeBeaufort()">Change beaufort</button>
+        <br /><button onclick="humidity.changeHumidity()">Change humidity</button>
+        
+        <script src="snap.svg-min.js"></script>
+        
+        <!-- Weather stuff http://codepen.io/grayghostvisuals/pen/ozwhA -->
+        <script>
+            
+            (function() {
+
+                // ***
+                // Windspeed
+                // ***
+                windspeed = (function() {
+                    
+                    var blades = {
+                        bladeSpeed : 3000,
+                        bladeGroup : undefined,
+                        blade1 : { transform: 'r30 50 50', transformTo: 'r390,50,50' },
+                        blade2 : { transform: 'r150 50 50' },
+                        blade3 : { transform: 'r270 50 50' }
+                    }
+                    
+                    var s = Snap("#windspeed");
+                    
+                    function drawRings() {
+                        var outerRing = s.circle(50, 50, 30);
+                        outerRing.attr({
+                            stroke: "#000",
+                            strokeWidth: 3,
+                            fill: 'none'
+                        });
+                        var innerRing = s.circle(50, 50, 22);
+                        innerRing.attr({
+                            stroke: "#000",
+                            strokeWidth: 3,
+                            fill: 'none'
+                        });
+                    }
+
+                    function drawBlades() {
+                        var blade1 = s.ellipse(70, 50, 20, 5);
+                        blade1.attr({
+                            stroke: "#fff",
+                            strokeWidth: 3,
+                            transform: blades.blade1.transform
+                        });
+                        var blade2 = blade1.clone();
+                        blade2.attr({
+                            transform: blades.blade2.transform
+                        });
+                        var blade3 = blade1.clone();
+                        blade3.attr({
+                            transform: blades.blade3.transform
+                        });
+                        blades.bladeGroup = s.g(blade1, blade2, blade3);
+                    }
+
+                    function animateBladeGroup() {
+                        blades.bladeGroup.stop().animate({
+                            transform: blades.blade1.transformTo
+                        }, 
+                        blades.bladeSpeed, 
+                        function() {
+                            blades.bladeGroup.transform(blades.blade1.transform);
+                            animateBladeGroup();
+                        });
+                    }
+                    
+                    return {
+                        draw : function() {
+                            drawRings();
+                            drawBlades();
+                            animateBladeGroup();
+                            var motor = s.circle(50, 50, 8);
+                        },
+                        changeSpeed : function() {
+                            blades.bladeSpeed = Math.floor(Math.random() * 10) * 1000;
+                            console.log(blades.bladeSpeed);
+                        }
+                    }
+                    
+                })();
+                
+                windspeed.draw();
+                
+                // ***
+                // Thermometer
+                // ***
+                thermometer = (function() {
+                    
+                    var thermometer = Snap("#thermometer");
+                    // M9,20 A6,6 45 1,1 21,20 L21,40 A12,12 0 1,1 9,40 L9,20 z"
+                    thermometer.path("M43,30 A6,6 45 1,1 55,30 L55,50 A12,12 0 1,1 43,50 L43,30 z").attr({
+                        stroke: '#000',
+                        strokeWidth: 2,
+                        fill: 'none'
+                    });
+                    thermometer.circle(49, 61, 5);
+
+                    var temperatureBar = thermometer.rect(47, 56, 4, 7, 2);
+                    var maxTemperature = 30;
+                    var temperature = 20;
+
+                    function animateThermometer(temperature) {
+                        if (temperature > maxTemperature) {
+                            temperature = maxTemperature;
+                        }
+
+                        temperatureBar.animate({
+                            y: 27 + (maxTemperature - temperature),
+                            height: 36 - (maxTemperature - temperature)
+                        }, 1000);
+                    }
+                    
+                    return {
+                        draw : function() {
+                            animateThermometer(temperature);
+                        },
+                        
+                        changeTemperature : function() {
+                            var newTemperature = Math.floor(Math.random() * 30);
+                            console.log(newTemperature + ' C');
+                            animateThermometer(newTemperature);
+                        }
+                    }
+                    
+                })();
+                
+                thermometer.draw();
+                
+                // ***
+                // Windmeter
+                // ***
+                
+                windmeter = (function() {
+                    
+                    var flag = undefined;
+                    var flagAnimationSpeed = ['r0', 'r10', 'r20'];
+                    var beaufort = 2;
+                    
+                    function drawWindmeter() {
+                        var windmeter = Snap("#windmeter");
+                        
+                        var pole = windmeter.rect(30, 25, 2, 50);
+                        
+                        var flagPart1 = windmeter.rect(35, 19, 3, 15);
+                        var flagPart2 = windmeter.path("M45,20 L55,21 L55,32 L45,33 z").attr({
+                            fill: '#000'
+                        });
+                        var flagPart3 = windmeter.rect(63, 22, 3, 9);
+                        var flagTop = windmeter.line(35, 19, 66, 22).attr({
+                            stroke: '#000',
+                            strokeWidth: '1'
+                        });
+                        var flagBottom = windmeter.line(35, 34, 66, 31).attr({
+                            stroke: '#000',
+                            strokeWidth: '1'
+                        });
+                        flag = windmeter.g(flagPart1, flagPart2, flagPart3, flagTop, flagBottom);
+                        animateFlag();
+                    }
+                    
+                    function animateFlag() {
+                        flag.stop().animate(
+                            {
+                                transform: flagAnimationSpeed[beaufort] + ', 35, 18'
+                            },
+                            1000
+                        );
+                    }
+
+                    return {
+                        draw : function() {
+                            drawWindmeter();
+                        },
+                        
+                        changeBeaufort : function() {
+                            beaufort = Math.floor(Math.random() * 3);
+                            animateFlag();
+                            console.log(beaufort);
+                        }
+                    }
+                    
+                })();
+                
+                windmeter.draw();
+                
+                // ***
+                // Humidity
+                // ***
+                humidity = (function() {
+                    
+                    var humimdity = 0;
+                    var drop = undefined;
+                    var dropsPos = [
+                        [ 't25,-2s,s0.55,0.55', 't25,0s,s0.55,0.55' ],
+                        [ 't12,-27s,s0.7,0.7', 't12,-25s,s0.7,0.7' ], 
+                        [ 't-10,-10s,s0.6,0.6', 't-10,-8s,s0.6,0.6' ]
+                    ];
+                    var drops = [];
+                    
+                    function drawDrop() {
+                        var surface = Snap("#humidity");
+                        
+                        drop = surface.path("M30,50 A11,11 0 1,0 50,50 L40,35 z").attr({
+                            stroke: '#000',
+                            strokeWidth: 2,
+                            fill: 'none'
+                        });
+                    }
+                    
+                    function clearHumidity() {
+                        for (i = 0; i < drops.length; i++) {
+                            drops[i].animate({
+                                strokeWidth: 0
+                            }, 100, function() {
+                                this.remove();
+                            });
+                        }
+                    }
+                    
+                    function adjustHumidity() {
+                        clearHumidity();
+                        for (i = 0; i < humimdity; i++) {
+                            var extraDrop = drop.clone();
+                            drops[i] = extraDrop;
+                            extraDrop.attr({
+                                transform: dropsPos[i][0],
+                                strokeWidth: 0
+                            }).animate({
+                                transform: dropsPos[i][1],
+                                strokeWidth: 2
+                            }, 1000);
+                        }
+                    }
+                    
+                    return {
+                        draw : function() {
+                            drawDrop();
+                        },
+                        
+                        changeHumidity : function() {
+                            humimdity = Math.floor(Math.random() * 4);
+                            adjustHumidity();
+                        }
+                    }
+                    
+                })();
+                
+                humidity.draw();
+                
+            })();            
+            
+        </script>
+    </body>
+</html>
