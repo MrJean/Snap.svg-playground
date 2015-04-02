@@ -15,9 +15,9 @@
         <br /><button onclick="thermometer.changeTemperature()">Change temperature</button>
         <br /><button onclick="windmeter.changeBeaufort()">Change beaufort</button>
         <br /><button onclick="humidity.changeHumidity()">Change humidity</button>
-        
+
         <script src="snap.svg-min.js"></script>
-        
+
         <!-- Weather stuff http://codepen.io/grayghostvisuals/pen/ozwhA -->
         <script>
             
@@ -29,16 +29,20 @@
                 windspeed = (function() {
                     
                     var blades = {
-                        bladeSpeed : 3000,
-                        bladeGroup : undefined,
-                        blade1 : { transform: 'r30 50 50', transformTo: 'r390,50,50' },
+                        blade1 : { transform: 'r30 50 50', rotation: 'r390,50,50' },
                         blade2 : { transform: 'r150 50 50' },
                         blade3 : { transform: 'r270 50 50' }
                     }
-                    
+                    var windmillSpeed = 3000;
                     var s = Snap("#windspeed");
+                    var ringGroup = undefined;
+                    var bladeGroup = undefined;
+                    var windmill = undefined;
                     
                     function drawRings() {
+                        var ringMask = s.path("M37,48 L8,67 L10,10 L44,10 L42,30 z").attr({
+                            fill: '#fff'
+                        });
                         var outerRing = s.circle(50, 50, 30);
                         outerRing.attr({
                             stroke: "#000",
@@ -51,13 +55,22 @@
                             strokeWidth: 3,
                             fill: 'none'
                         });
+                        var ringPart1= s.g(outerRing, innerRing);
+                        ringPart1.attr({
+                            mask: ringMask
+                        });
+                        var ringPart2 = ringPart1.clone().attr({
+                            transform: 'r120 50 50'
+                        });
+                        var ringPart3 = ringPart1.clone().attr({
+                            transform: 'r240 50 50'
+                        });
+                        ringGroup = s.g(ringPart1, ringPart2, ringPart3);
                     }
 
                     function drawBlades() {
                         var blade1 = s.ellipse(70, 50, 20, 5);
                         blade1.attr({
-                            stroke: "#fff",
-                            strokeWidth: 3,
                             transform: blades.blade1.transform
                         });
                         var blade2 = blade1.clone();
@@ -68,17 +81,22 @@
                         blade3.attr({
                             transform: blades.blade3.transform
                         });
-                        blades.bladeGroup = s.g(blade1, blade2, blade3);
+                        bladeGroup = s.g(blade1, blade2, blade3);
+                    }
+                    
+                    function mergeWindmill() {
+                        var motor = s.circle(50, 50, 8);
+                        windmill = s.g(ringGroup, bladeGroup, motor);
                     }
 
-                    function animateBladeGroup() {
-                        blades.bladeGroup.stop().animate({
-                            transform: blades.blade1.transformTo
+                    function animateWindmill() {
+                        windmill.stop().animate({
+                            transform: blades.blade1.rotation
                         }, 
-                        blades.bladeSpeed, 
+                        windmillSpeed, 
                         function() {
-                            blades.bladeGroup.transform(blades.blade1.transform);
-                            animateBladeGroup();
+                            windmill.transform(blades.blade1.transform);
+                            animateWindmill();
                         });
                     }
                     
@@ -86,12 +104,11 @@
                         draw : function() {
                             drawRings();
                             drawBlades();
-                            animateBladeGroup();
-                            var motor = s.circle(50, 50, 8);
+                            mergeWindmill();
+                            animateWindmill();
                         },
                         changeSpeed : function() {
-                            blades.bladeSpeed = Math.floor(Math.random() * 10) * 1000;
-                            console.log(blades.bladeSpeed);
+                            windmillSpeed = Math.floor(Math.random() * 10) * 1000;
                         }
                     }
                     
@@ -105,7 +122,6 @@
                 thermometer = (function() {
                     
                     var thermometer = Snap("#thermometer");
-                    // M9,20 A6,6 45 1,1 21,20 L21,40 A12,12 0 1,1 9,40 L9,20 z"
                     thermometer.path("M43,30 A6,6 45 1,1 55,30 L55,50 A12,12 0 1,1 43,50 L43,30 z").attr({
                         stroke: '#000',
                         strokeWidth: 2,
@@ -135,7 +151,6 @@
                         
                         changeTemperature : function() {
                             var newTemperature = Math.floor(Math.random() * 30);
-                            console.log(newTemperature + ' C');
                             animateThermometer(newTemperature);
                         }
                     }
@@ -193,7 +208,6 @@
                         changeBeaufort : function() {
                             beaufort = Math.floor(Math.random() * 3);
                             animateFlag();
-                            console.log(beaufort);
                         }
                     }
                     
