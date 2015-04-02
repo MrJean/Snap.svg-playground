@@ -1,3 +1,7 @@
+/**
+ * Beaufort
+ */
+
 function Beaufort(options) {
 
     var svg, flag = undefined;
