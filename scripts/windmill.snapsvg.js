@@ -6,16 +6,13 @@
 
 function Windmill(options) {
 
-    var svg = undefined;
+    var svg, ringGroup, bladeGroup, windmill = undefined;
 
     var blades = {
         blade1 : { transform: 'r30 50 50', rotation: 'r390,50,50' },
         blade2 : { transform: 'r150 50 50' },
         blade3 : { transform: 'r270 50 50' }
     };
-    var ringGroup = undefined;
-    var bladeGroup = undefined;
-    var windmill = undefined;
 
     function drawRings() {
         svg = Snap(ops.element);
@@ -105,7 +102,7 @@ function Windmill(options) {
     animateWindmill();
 
     return {
-        changeSpeed : function(speed) {
+        setSpeed : function(speed) {
             ops.speed = speed
         }
     }
