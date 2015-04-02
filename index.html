@@ -2,7 +2,7 @@
     <head>
         <title>Windspeed</title>
         <style type="text/css">
-            svg { height: 100px; width: 100px; border: 1px solid #ccc; }
+            svg { max-width: 100px; }
         </style>
     </head>
     <body>
@@ -11,7 +11,7 @@
         <svg id="windmeter"></svg>
         <svg id="humidity"></svg>
         
-        <br /><button onclick="windspeed.changeSpeed()">Change speed</button>
+        <br /><button onclick="windmill.changeSpeed()">Change speed</button>
         <br /><button onclick="thermometer.changeTemperature()">Change temperature</button>
         <br /><button onclick="windmeter.changeBeaufort()">Change beaufort</button>
         <br /><button onclick="humidity.changeHumidity()">Change humidity</button>
@@ -24,9 +24,12 @@
             (function() {
 
                 // ***
-                // Windspeed
+                // Windmill
                 // ***
-                windspeed = (function() {
+                windmill = (function() {
+                    
+                    var s = Snap("#windspeed");
+                    s.attr({ viewBox: "0 0 100 100" });
                     
                     var blades = {
                         blade1 : { transform: 'r30 50 50', rotation: 'r390,50,50' },
@@ -34,7 +37,6 @@
                         blade3 : { transform: 'r270 50 50' }
                     }
                     var windmillSpeed = 3000;
-                    var s = Snap("#windspeed");
                     var ringGroup = undefined;
                     var bladeGroup = undefined;
                     var windmill = undefined;
@@ -114,7 +116,7 @@
                     
                 })();
                 
-                windspeed.draw();
+                windmill.draw();
                 
                 // ***
                 // Thermometer
@@ -122,6 +124,8 @@
                 thermometer = (function() {
                     
                     var thermometer = Snap("#thermometer");
+                    thermometer.attr({ viewBox: "0 0 100 100" });
+                    
                     thermometer.path("M43,30 A6,6 45 1,1 55,30 L55,50 A12,12 0 1,1 43,50 L43,30 z").attr({
                         stroke: '#000',
                         strokeWidth: 2,
@@ -171,6 +175,7 @@
                     
                     function drawWindmeter() {
                         var windmeter = Snap("#windmeter");
+                        windmeter.attr({ viewBox: "0 0 100 100" });
                         
                         var pole = windmeter.rect(30, 25, 2, 50);
                         
@@ -231,6 +236,7 @@
                     
                     function drawDrop() {
                         var surface = Snap("#humidity");
+                        surface.attr({ viewBox: "0 0 100 100" });
                         
                         drop = surface.path("M30,50 A11,11 0 1,0 50,50 L40,35 z").attr({
                             stroke: '#000',
