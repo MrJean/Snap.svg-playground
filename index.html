@@ -17,6 +17,7 @@
         <script src="scripts/windmill.snapsvg.js"></script>
         <script src="scripts/thermometer.snapsvg.js"></script>
         <script src="scripts/beaufort.snapsvg.js"></script>
+        <script src="scripts/humidity.snapsvg.js"></script>
 
         <script>
             
@@ -44,71 +45,12 @@
 
                 var windmeter = new Beaufort();
                 windmeter.setBeaufort(1);
-
-                // ***
-                // Humidity
-                // ***
-                humidity = (function() {
-                    
-                    var humimdity = 0;
-                    var drop = undefined;
-                    var dropsPos = [
-                        [ 't25,-2s,s0.55,0.55', 't25,0s,s0.55,0.55' ],
-                        [ 't12,-27s,s0.7,0.7', 't12,-25s,s0.7,0.7' ], 
-                        [ 't-10,-10s,s0.6,0.6', 't-10,-8s,s0.6,0.6' ]
-                    ];
-                    var drops = [];
-                    
-                    function drawDrop() {
-                        var surface = Snap("#humidity");
-                        surface.attr({ viewBox: "0 0 100 100" });
-                        
-                        drop = surface.path("M30,50 A11,11 0 1,0 50,50 L40,35 z").attr({
-                            stroke: '#000',
-                            strokeWidth: 2,
-                            fill: 'none'
-                        });
-                    }
-                    
-                    function clearHumidity() {
-                        for (i = 0; i < drops.length; i++) {
-                            drops[i].animate({
-                                strokeWidth: 0
-                            }, 100, function() {
-                                this.remove();
-                            });
-                        }
-                    }
-                    
-                    function adjustHumidity() {
-                        clearHumidity();
-                        for (i = 0; i < humimdity; i++) {
-                            var extraDrop = drop.clone();
-                            drops[i] = extraDrop;
-                            extraDrop.attr({
-                                transform: dropsPos[i][0],
-                                strokeWidth: 0
-                            }).animate({
-                                transform: dropsPos[i][1],
-                                strokeWidth: 2
-                            }, 1000);
-                        }
-                    }
-                    
-                    return {
-                        draw : function() {
-                            drawDrop();
-                        },
-                        
-                        changeHumidity : function() {
-                            humimdity = Math.floor(Math.random() * 4);
-                            adjustHumidity();
-                        }
-                    }
-                    
-                })();
                 
-                humidity.draw();
+                var humidity = new Humidity({
+                    stroke: 'Blue',
+                    speed: 500,
+                    humidity: 2
+                });
                 
             })();            
             
